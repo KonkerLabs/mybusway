@@ -1,6 +1,6 @@
 {
   "name": "mybusway-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "custom": {
     "packageName": "konkerlabs/techlab-misc:mybusway-server-v"
   },
@@ -16,6 +16,7 @@
     "nodemon": "^2.0.4"
   },
   "scripts": {
+    "start": "export NODE_ENV=development & nodemon",
     "docker-build": "docker build -t ${npm_package_custom_packageName}${npm_package_version} . ",
     "docker-run-err": "docker run --rm --env KONKER_APPLICATION=globo2 -p 8080:8080 --name mybusway-server ${npm_package_custom_packageName}${npm_package_version}",
     "docker-run": "docker run --rm -p 8080:8080 -e DEBUG_MODE_CACHED_POSITIONS=0 --name mybusway-server ${npm_package_custom_packageName}${npm_package_version}",

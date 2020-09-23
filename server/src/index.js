@@ -8,6 +8,8 @@ var conversion = require('./aux.js');
 var konker = require('./api/konker.js');
 var md5 = require('md5');
 var fs = require('fs');
+var moment = require('moment');
+const { allowedNodeEnvironmentFlags } = require('process');
 
 // load configuration environment from dotenv
 dotenv.config();
@@ -16,6 +18,7 @@ konker.api.login(process.env.KONKER_API_TOKEN);
 konker.api.setApplication(process.env.KONKER_APPLICATION);
 
 const DEBUG_MODE_CACHED_POSITIONS = conversion.parseBool(process.env.DEBUG_MODE_CACHED_POSITIONS);
+const CACHE_EXPIRE_TIME = parseInt(process.env.CACHE_EXPIRE_TIME || '15');
 
 console.log('---------------');
 console.log(`Registering server with application KONKER_APPLICATION="${process.env.KONKER_APPLICATION}"`);
@@ -29,6 +32,16 @@ class ServerNode {
     this._busesIndex = {};
     this.readConfig();
     this._localCache = {};
+    this._cacheTS = moment();
+    this._flagReloadCache = false;
+  }
+
+  forceCacheExpire() {
+    this._flagReloadCache = true;
+  }
+
+  cacheExpired() {
+    return (moment.duration(this._cacheTS.diff(moment())).asMinutes() > CACHE_EXPIRE_TIME) || this._flagReloadCache;
   }
 
   readConfig() {
@@ -36,7 +49,9 @@ class ServerNode {
   }
 
   getBuses() {
-    return this._buses;
+    if (this.cacheExpired()) 
+      return this.refreshBuses();
+    return new Promise((resolve, reject) => resolve(this._buses));
   }
 
   getBus(hash) {
@@ -100,7 +115,9 @@ class ServerNode {
           this._buses[bus.guid] = bus;
           this._busesIndex[bus.hash] = bus;        
         });
-        resolve(this);
+        this._cacheTS = moment();
+        this._flagReloadCache = false;
+        resolve(this._buses);
       })
       .catch(ex => {
         console.error(`ERROR on refreshing buses - HTTP ${ex.response.status} - ${ex.response.config.url}`);
@@ -153,28 +170,41 @@ app.get('/', (req, res) => {
   res.status(200).send('{"status":"ok"}');
 });
 
+app.get('/expireCache', (req, res) => {
+  server.forceCacheExpire();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.status(200).send({cache:'expired'});
+});
+
+app.get('/cacheInfo', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.status(200).send({cache:'active', ts:server._cacheTS.format(), size:Object.keys(server._buses).length});
+});
+
 app.get('/buses', (req, res) => {
   // get all data from the platform (devices registered for this application)
   // TODO: create a local cache to answer faster
-  var data = server.getBuses();
-  var returnValue = Object.keys(data).map(busId => {
-    bus = data[busId];
-    if (bus.active)
-      return {
-        hash: bus.hash,
-        name: bus.name,
-        line: bus.locationName,
-        guid: bus.guid /* TODO: remove for production */
-
-      };
-    return undefined;
-  });
-
-  console.log(returnValue);
-
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.status(200).send(returnValue);
+  server.getBuses().then(data => {
+    var returnValue = Object.keys(data).map(busId => {
+      bus = data[busId];
+      if (bus.active) {
+        var info = {
+          hash: bus.hash,
+          name: bus.name,
+          line: bus.locationName
+        };
+        if (process.env.NODE_ENV !== 'production') info.guid = bus.guid; /* ONLY FOR DEVELOPMENT TO ENABLE DEBUG */
+        return info;
+      }
+      return undefined;
+    });
   
+    console.log(returnValue);
+  
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.status(200).send(returnValue);
+  
+  });  
 });
 
 app.get('/bus/:hash/position', (req, res) => {
@@ -200,7 +230,6 @@ app.get('/bus/:hash/position', (req, res) => {
       res.status(500).send(ex);
     });
 });
-
 
 app.get('/stops/:line?', (req, res) => {
   // return current position for a given bus .. 
