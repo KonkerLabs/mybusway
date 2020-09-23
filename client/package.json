@@ -1,0 +1,55 @@
+{
+  "name": "mybusway",
+  "version": "0.1.0",
+  "private": true,
+  "custom": {
+    "packageName": "konkerlabs/techlab-misc:mybusway-client-v"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "axios": "^0.20.0",
+    "leaflet": "^1.7.1",
+    "leaflet-drift-marker": "^1.0.3",
+    "leaflet.awesome-markers": "^2.0.5",
+    "moment": "^2.28.0",
+    "react": "^16.13.1",
+    "react-app-rewired": "^2.1.6",
+    "react-dom": "^16.13.1",
+    "react-env": "^0.0.0",
+    "react-leaflet": "^2.7.0",
+    "react-scripts": "3.4.3",
+    "react-sliding-pane": "^6.1.0"
+  },
+  "scripts": {
+    "prestart": "react-env",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject",
+    "docker-build": "docker build . -t ${npm_package_custom_packageName}${npm_package_version}",
+    "docker-run": "docker run --rm -e MYBUSWAY_SERVER=http://localhost:8080 -v /usr/src/app/node_modules --name mybusway-client -p 80:80 -p 5000:5000 -p 3000:3000 ${npm_package_custom_packageName}${npm_package_version}",
+    "docker-push": "docker push ${npm_package_custom_packageName}${npm_package_version}",
+    "sample": "echo ${npm_package_custom_packageName}${npm_package_version}"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@beam-australia/react-env": "^2.1.2",
+    "dotenv-webpack": "^3.0.0"
+  }
+}

@@ -1,0 +1,40 @@
+body {
+  margin: 0px;
+  width: 100vw;
+  height: 100vh; 
+}
+
+.App {
+  text-align: center;
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  height: 100%;
+}
+
+.map {
+  height: 100%;
+
+}
+
+/* gray */
+.inactive {
+  filter: invert(66%) sepia(0%) saturate(672%) hue-rotate(143deg) brightness(121%) contrast(85%);
+  color: 'gray';
+}
+/* blue */
+.running { 
+  filter: invert(10%) sepia(100%) saturate(6494%) hue-rotate(245deg) brightness(70%) contrast(127%);
+  color:'blue';
+}
+/*  stalled */ 
+.stalled { 
+  filter: invert(98%) sepia(1%) saturate(335%) hue-rotate(50deg) brightness(113%) contrast(88%);
+  color: 'red';
+}
+.stopped { 
+  filter: invert(0%) sepia(100%) saturate(0%) hue-rotate(176deg) brightness(95%) contrast(106%);
+  color: 'yellow';
+}

@@ -1,0 +1,1 @@
+window._env = {"NODE_ENV":"development","REACT_APP_MYBUSWAY_SERVER":"http://128.199.12.162:8080"};
