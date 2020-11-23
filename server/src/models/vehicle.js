@@ -1,0 +1,21 @@
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var { ObjectId } = mongoose;
+
+var VehicleSchema = new Schema({
+  name: String,
+  hash: String,
+  device_guid: String,
+  driver_id: ObjectId,
+  createdAt: {type: Date, default: Date.now},
+  line: String,
+  line_id: ObjectId,
+  active: Boolean // flag if this car is active 
+});
+
+
+// Exportamos el modelo 'User' para usarlo en otras
+// partes de la aplicación
+var VehicleModel = mongoose.model('Vehicle', VehicleSchema);
+
+module.exports = VehicleModel;

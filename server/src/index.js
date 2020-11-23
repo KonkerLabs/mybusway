@@ -1,15 +1,72 @@
 /*jshint esversion: 6 */
 
+var fs = require('fs');
 var express = require('express');
 var dotenv = require('dotenv');
-var app = express();
 var conversion = require('./aux.js');
 
 var konker = require('./api/konker.js');
-var md5 = require('md5');
-var fs = require('fs');
-var moment = require('moment');
-const { allowedNodeEnvironmentFlags } = require('process');
+var mongoose = require('mongoose'); // Mongoose: Libreria para conectar con MongoDB
+const passport = require('passport');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
+require('./models/index');
+require('./passport')(passport);
+const jwt = require('jsonwebtoken');
+
+// swagger API 
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+
+const MONGO_SERVER = process.env.MONGO_SERVER || 'localhost';
+const MONGO_PORT = process.env.MONGO_PORT || '27017';
+const MONGO_USERNAME = process.env.MONGO_USERNAME || 'mongo';
+const MONGO_PASSWORD = process.env.MONGO_PASSWORD || 'mongopwd';
+const MONGO_DATABASE = process.env.MONGO_DATABASE || 'mybusway';
+
+// Conexión a la base de datos de MongoDB que tenemos en local
+var urlx = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_SERVER}:${MONGO_PORT}/${MONGO_DATABASE}`;
+console.log(urlx);
+mongoose.connect(urlx, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, res) {
+  if(err) throw err;
+  console.log('Conectado con éxito a la BD');
+});
+
+var app = express();
+
+// Middlewares de Express que nos permiten enrutar y poder
+// realizar peticiones HTTP (GET, POST, PUT, DELETE)
+const cookieParser = require('cookie-parser');
+const methodOverride = require('method-override');
+const session = require('express-session');
+const errorHandler = require('errorhandler');
+
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+//app.use(express.urlencoded({extended: true}));
+//app.use(express.json());
+app.use(methodOverride());
+
+// configure express 
+app.use(cors());
+
+// Indicamos que use sesiones, para almacenar el objeto usuario
+// y que lo recuerde aunque abandonemos la página
+app.use(session({ secret: 'lollllo' }));
+
+// Configuración de Passport. Lo inicializamos
+// y le indicamos que Passport maneje la Sesión
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+// Si estoy en local, le indicamos que maneje los errores
+// y nos muestre un log más detallado
+if ('development' == app.get('env')) {
+  app.use(errorHandler());
+}
 
 // load configuration environment from dotenv
 dotenv.config();
@@ -18,120 +75,27 @@ konker.api.login(process.env.KONKER_API_TOKEN);
 konker.api.setApplication(process.env.KONKER_APPLICATION);
 
 const DEBUG_MODE_CACHED_POSITIONS = conversion.parseBool(process.env.DEBUG_MODE_CACHED_POSITIONS);
-const CACHE_EXPIRE_TIME = parseInt(process.env.CACHE_EXPIRE_TIME || '15');
 
 console.log('---------------');
+console.log('ENVIRONMENT VARIABLES ...');
+console.log(process.env);
+console.log('---------------');
+
 console.log(`Registering server with application KONKER_APPLICATION="${process.env.KONKER_APPLICATION}"`);
 console.log(`using API TOKEN ... KONKER_API_TOKEN= ${process.env.KONKER_API_TOKEN}`);
 console.log(`using ${DEBUG_MODE_CACHED_POSITIONS ? 'DEBUG' : 'PRODUCTION'} MODE ---- ${DEBUG_MODE_CACHED_POSITIONS}`);
 console.log('---------------');
 
-class ServerNode { 
-  constructor() {
-    this._buses = {};
-    this._busesIndex = {};
-    this.readConfig();
-    this._localCache = {};
-    this._cacheTS = moment();
-    this._flagReloadCache = false;
-  }
-
-  forceCacheExpire() {
-    this._flagReloadCache = true;
-  }
-
-  cacheExpired() {
-    return (moment.duration(this._cacheTS.diff(moment())).asMinutes() > CACHE_EXPIRE_TIME) || this._flagReloadCache;
-  }
-
-  readConfig() {
-    this._busStops = JSON.parse(fs.readFileSync(process.env.BUS_STOP_CONFIG));
-  }
-
-  getBuses() {
-    if (this.cacheExpired()) 
-      return this.refreshBuses();
-    return new Promise((resolve, reject) => resolve(this._buses));
-  }
-
-  getBus(hash) {
-    return new Promise((resolve, reject) => {
-      if (Object.keys(this._busesIndex).includes(hash)) {
-        resolve(this._busesIndex[hash]);
-      }
-      reject(hash);
-    });
-  }
-
-  // special method used for debuging / development 
-  // to load historical position from the device and return old points as new ones ...
-  // to enable fast track of development  -- doesn't need that device move itself in real ...
-  // but use previous recorded information of movements ... 
-  // 
-  getBusLocationFromCache(bus) {
-    return new Promise((resolve, reject) => {
-      // check local cached information 
-      var busData = this._localCache[bus.guid]; 
-      if (!busData) {
-        // first time load cache from konker api 
-        konker.api.readData({guid: bus.guid, limit:1000})
-          .then(data => {
-            // set local buffer 
-            this._localCache[bus.guid] = {buffer: data.filter(v => (v.payload.attr.type === 'FRI')), i:-1};
-            // return just oldest position to the caller 
-            resolve(this._localCache[bus.guid].buffer.slice(this._localCache[bus.guid].i));
-          })
-          .catch(ex => reject(ex));
-      } else {
-        // get the new point 
-        this._localCache[bus.guid].i = this._localCache[bus.guid].i - 1;
-        resolve(this._localCache[bus.guid].buffer.slice(this._localCache[bus.guid].i));
-      }
-    });
-
-  }
-
-  getBusLocation(bus) {
-    if (DEBUG_MODE_CACHED_POSITIONS) 
-      return this.getBusLocationFromCache(bus);
-    return new Promise((resolve, reject) => {
-      konker.api.readData({guid: bus.guid, limit:500})
-        .then(data => {
-          // filter events that are not: FRI          
-          var data2 = data.filter(v => (v.payload.attr.type === 'FRI'));
-          // var data2 = data; // all information
-          resolve(data2);
-        })
-        .catch(ex => reject(ex));
-    });
-  }
-
-  refreshBuses() {
-    return new Promise((resolve, reject) => {
-      konker.api.getAllDevices()
-      .then(data => {
-        data.forEach(bus => {
-          bus.hash = md5(`${bus.guid} - ${bus.name}`);
-          this._buses[bus.guid] = bus;
-          this._busesIndex[bus.hash] = bus;        
-        });
-        this._cacheTS = moment();
-        this._flagReloadCache = false;
-        resolve(this._buses);
-      })
-      .catch(ex => {
-        console.error(`ERROR on refreshing buses - HTTP ${ex.response.status} - ${ex.response.config.url}`);
-        // console.debug(ex);
-        reject(this);
-      });
-    });
-  }
-
-}
-
-var server = new ServerNode();
+const { ServerNode } = require('./server');
+var server = new ServerNode(konker);
 
 server.refreshBuses().then(data => console.log('LOADED BUSES')).catch(ex => { console.error('PROBLEMS LOADING BUSES; CHECK APPLICATION AND API KEY INFORMATION'); process.exit(1); });
+
+var acl = require('acl');
+const { triggerAsyncId } = require('async_hooks');
+// Or Using the mongodb backend
+var prefix = 'acl';
+acl = new acl(new acl.mongodbBackend(mongoose.connection.db, prefix));
 
 /* 
   SAMPLE USAGE OF API PROXY 
@@ -165,9 +129,80 @@ konker.api.getApplications().then(res => {
 });
 */ 
 
+// general operations 
+
+app.get('/login', (req, res) => {
+  console.log('LOGIN FORM');
+  res.json({username: '', password:''});
+});
+/* Rutas de Passport */
+// Ruta para desloguearse
+app.get('/logout', function(req, res) {
+  req.logout();
+  res.redirect('/');
+});
+
+// authentication 
+
+app.post('/auth/local', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    console.log(`err=${err} user=${user} info=${info}`);
+    console.log(info);
+    if (err) return res.status(400).json({errors:err});
+    if (!user) return res.status(400).json({errors:'no user'});
+    req.logIn(user, (err) => {
+      if (err) return res.status(400).json({errors:err});
+      const body = { _id: user._id, name: user.name };
+      const token = jwt.sign({ user: body }, 'TOP_SECRET');
+      return res.status(200).json({succes:'logged in', user:user, token:token});      
+    });
+  })(req, res, next);
+});
+// Ruta para autenticarse con Twitter (enlace de login)
+app.get('/auth/twitter', passport.authenticate('twitter'));
+// Ruta de callback, a la que redirigirá tras autenticarse con Twitter.
+// En caso de fallo redirige a otra vista '/login'
+app.get('/auth/twitter/callback', passport.authenticate('twitter',
+  { successRedirect: '/', failureRedirect: '/login' }, (err, user, info) => {
+    console.log(this);
+  }));
+
+// Ruta para autenticarse con Facebook (enlace de login)
+app.get('/auth/facebook', passport.authenticate('facebook'));
+// Ruta de callback, a la que redirigirá tras autenticarse con Facebook.
+// En caso de fallo redirige a otra vista '/login'
+app.get('/auth/facebook/callback', passport.authenticate('facebook',
+  { successRedirect: '/jwt', failureRedirect: '/login' }
+));
+
+// general operations 
+app.get('/jwt', async(req, res, next) => {
+  console.log('JWT');
+  passport.authenticate(['local', 'facebook', 'twitter'], 
+    async (err, user, info) => {
+
+      console.log('PASSPORT JWT');
+
+      req.login(user, {session:false}, async(error) => {
+        if (error) return next(error);
+        const body = { _id: user._id, name: user.name };
+        const token = jwt.sign({ user: body }, 'TOP_SECRET');
+        return res.json({ token });
+      });
+
+    })(req,res,next);
+});
+
+
+// general operations 
 app.get('/', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.status(200).send('{"status":"ok"}');
+  // console.log(passport);
+  res.json({status:true, user:req.user});
+});
+
+app.post('/login', passport.authenticate('local'), (req, res) => {
+  console.log('LOGIN2');
+  res.json({'MSG':'OK', 'USER':req.user});
 });
 
 app.get('/expireCache', (req, res) => {
@@ -222,11 +257,15 @@ app.get('/bus/:hash/position', (req, res) => {
         })
         .catch(ex => {
           res.setHeader('Access-Control-Allow-Origin', '*');
+          console.log('error1');
+          console.log(ex);
           res.status(500).send(ex);
         });
     })
     .catch(ex => {
       res.setHeader('Access-Control-Allow-Origin', '*');
+      console.log('error2');
+      console.log(ex);
       res.status(500).send(ex);
     });
 });
@@ -237,6 +276,54 @@ app.get('/stops/:line?', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.status(200).send(server._busStops.filter(bs => line ? bs.LINHA === line : 1));
 });
+
+app.get('/lines', (req, res) => { 
+  server.getLines().then(doc => res.json(doc));
+});
+
+app.post('/line', (req, res) => {
+  server.addLine(req.body).then(doc => res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+app.put('/line/:name', (req, res) => {
+  server.updateLine({name:req.params.name, ...req.body}).then(doc => res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+app.delete('/line/:name', (req, res) => {
+  server.removeLine({name:req.params.name}).then(doc=> res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+// stops
+
+app.get('/line/:name/stops', (req, res) => {
+  server.getStops({line:req.params.name}).then(doc => res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+app.post('/line/:name/stop', (req, res) => {
+  server.addStop({line:req.params.name, ... req.body}).then(doc => res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+app.delete('/line/:line/stop/:stop', (req, res) => {
+  server.removeStop({line:req.params.line, name: req.params.stop}).then(doc => res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+app.put('/line/:line/stop/:stop', (req, res) => {
+  server.updateStop({line:req.params.line, name: req.params.stop, ... req.body}).then(doc => res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+// driver allocation 
+
+app.post('/bus/:bus/inLine/:line', (req, res) => {
+  server.useBus(req.params.line, req.params.bus, req.user).then(doc => res.json(doc)).catch(err => res.status(400).json(err));
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+const users = require('./routes/users');
+app.use('/users', users);
+
+const vehicles = require('./routes/vehicle');
+app.use('/vehicles', vehicles);
 
 //PORT ENVIRONMENT VARIABLE
 const port = process.env.PORT || 8080;
