@@ -229,6 +229,8 @@ class App extends React.Component {
       // var values = Object.values(busInfo);
       // console.log('VALUES =>');
 
+      if (!busInfo) return;
+
       var hash = busInfo.hash;
       var clazz = 'running';
       var line = this.DEFAULT_LINE;
