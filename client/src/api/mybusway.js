@@ -15,7 +15,7 @@ console.log(`ENV = ${env('MYBUSWAY_SERVER')}`)
 class MyBusWay {
 
   constructor() {
-    this.uri = env('MYBUSWAY_SERVER') || 'http://localhost:8080';
+    this.uri = env('MYBUSWAY_SERVER') || 'http://projac.mybusway.com:8080'; //'http://localhost:8080';
     console.log(`SERVER = ${this.uri}`);
   }
 
