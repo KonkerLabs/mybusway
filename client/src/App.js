@@ -284,12 +284,87 @@ class App extends React.Component {
       console.log(`LAST POSITION = ${lastPosition}  |   STATE = ${busInfo.moved}`);
 
       return (
-        <Overlay name={name} key={`bus.info.${name}`}>
-          <LayerGroup>
-            {paths.map((path, i) => (<Polyline key={`${hash}.path.${i}`} icon={this.busIcon} positions={path} className={clazz} weight={3}></Polyline>))}
+          <Overlay name={name} key={`bus.info.${name}`}>
+            <LayerGroup>
             {lastPosition &&   <DriftMarker key={`bus.${name}`} position={lastPosition} duration={1000} icon={busInfo.icon} > </DriftMarker>}
-          </LayerGroup>
-        </Overlay>
+            </LayerGroup>
+          </Overlay>
+        );
+      
+    });
+
+    // bus history lines 
+
+    const tracks = this.state.buses.map(busInfo => {
+      // bus is a list of lat longs for this bus ... 
+      // create a poly line to display itss location
+
+      // console.log('BUSINFO');
+      // console.log(busInfo);
+
+      // var values = Object.values(busInfo);
+      // console.log('VALUES =>');
+
+      if (!busInfo) return;
+
+      var hash = busInfo.hash;
+      var clazz = 'running';
+      var line = this.DEFAULT_LINE;
+      var name = `${busInfo.name} histórico`;
+
+      switch (busInfo.line) {
+        case "red": line = this.LINE.RED; break; 
+        case "green": line = this.LINE.RED; break; 
+        case "blue": line = this.LINE.RED; break; 
+        case "yellow": line = this.LINE.RED; break; 
+        default: 
+      }
+
+      busInfo.icon = this.ICON.BUS[line.ndx];
+    
+      // var now = moment(new Date());
+      var lastPosition = busInfo.lastPosition ? L.latLng(busInfo.lastPosition._lat, busInfo.lastPosition._lon): undefined;
+      var prevPosition = {_ts:moment(), _lat: undefined, _lon:undefined};
+      var distances = [];
+      //
+      // return an array of arrays of positions ... 
+      // each element of the array has a path (to be placed for this device)
+      // large 'jumps' on location are segreggated in separed paths 
+      // large 'jumps' means two consecutive positions far than 90m 
+      //
+      var paths = busInfo.positions.map(position => {
+        // console.log(bus);      
+        if (position) {
+          // var duration = moment.duration(prevPosition._ts.diff(position._ts));
+          // var hours = duration.asHours(); 
+          // 
+          clazz = busInfo.moved ? 'running' : 'innactive';
+          // clazz = (hours < 1 ? 'running' : (hours < 24 ? 'inactive' : (hours < 100 ? 'stalled' : 'stopped')));
+          // compute distance 
+          let dist = prevPosition._lat ? this.distance(position, prevPosition) : 0;
+          prevPosition = {_ts: moment(position._ts), _lat:position._lat, _lon:position._lon};
+          distances.push(dist);
+          return {_pos: L.latLng(position._lat, position._lon), _dist: dist};
+        }
+        return undefined;
+
+      })
+        .filter(v => v)
+        .reduce((t, v) => {
+          if (v._dist > 0.09) t.push([]);
+          t.slice(-1)[0].push(v._pos);
+          return t;
+        }, [[]]);
+      // show distances 
+      console.log(`${busInfo.name} => ${Math.min(...distances)} ... ${Math.max(...distances)}`);
+      console.log(`LAST POSITION = ${lastPosition}  |   STATE = ${busInfo.moved}`);
+
+      return (
+          <Overlay name={name} key={`bus.info.${name}-track`}>
+            <LayerGroup>
+            {paths.map((path, i) => (<Polyline key={`${hash}.path.${i}`} icon={this.busIcon} positions={path} className={clazz} weight={3}></Polyline>))}
+            </LayerGroup>
+          </Overlay>
         );
       
     });
@@ -357,9 +432,10 @@ class App extends React.Component {
 
           </BaseLayer>
           {markers}
+
+          {tracks}
         
           {busStops}
-            
           
         </LayersControl>
       </Map>

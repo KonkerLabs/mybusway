@@ -6,7 +6,7 @@ var dotenv = require('dotenv');
 var conversion = require('./aux.js');
 
 var konker = require('./api/konker.js');
-var mongoose = require('mongoose'); // Mongoose: Libreria para conectar con MongoDB
+var mongoose = require('mongoose'); 
 const passport = require('passport');
 const cors = require('cors');
 const bodyParser = require('body-parser');
