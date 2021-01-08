@@ -25,4 +25,9 @@
 
 **/credentials.json
 
+# database
+
+data/db
+
+
 src/config.js
