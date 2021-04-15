@@ -1,4 +1,4 @@
-/*jshint esversion: 6 */
+/*jshint esversion: 9 */
 
 import React from 'react';
 import { Map, TileLayer, Marker, Polyline, LayerGroup, LayersControl } from 'react-leaflet';
@@ -8,6 +8,15 @@ import './App.css';
 // import SlidingPane from "react-sliding-pane";
 import "react-sliding-pane/dist/react-sliding-pane.css";
 import { DriftMarker } from "leaflet-drift-marker";
+import AntPath from "react-leaflet-ant-path";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import BusStateForm from './components/BusStateForm';
+
 
 
 const { BaseLayer, Overlay } = LayersControl;
@@ -32,7 +41,14 @@ class App extends React.Component {
       buses: [],
       stops: [],
       isPaneOpen: false,
-      lastUpdate: moment()
+      lastUpdate: moment(),
+      updateBus: (bus) => {
+        console.log('ORIGINAL STATE UPDATE');
+        let _buses = this.state.buses;
+        _buses = _buses.map((b) => (b.hash === bus.hash) ? bus : b);
+        console.log(_buses);
+        this.setState({...this.state, buses:_buses});
+      }
     };
   
     // this.server = 'http://192.168.1.172:8080';
@@ -73,6 +89,7 @@ class App extends React.Component {
     };
   
   }
+
 
   // redMarker = L.AwesomeMarkers.icon({
   //   icon: 'bus',
@@ -147,8 +164,9 @@ class App extends React.Component {
       console.log('NO DATA');
       return;
     }
-    console.log('BUSINFO');
-    console.log(data);
+    // TODO: enable when required
+    // console.log('BUSINFO');
+    // console.log(data);
     console.log('updating bus position');
     var data2  = data.map(bus => {
       // console.log(`loading bus position for`);
@@ -172,12 +190,13 @@ class App extends React.Component {
     Promise.all(data2).then(info => {
       // console.log('UPDATED BUS DATA => ');
       // console.log(info);
-      console.log('==============');
-      console.log('OLD BUSES');
-      console.log(this.state.buses);
-      console.log('NEW BUSES');
-      console.log(info);
-      console.log('==============');
+      // TODO: enable when required
+      // console.log('==============');
+      // console.log('OLD BUSES');
+      // console.log(this.state.buses);
+      // console.log('NEW BUSES');
+      // console.log(info);
+      // console.log('==============');
       this.setState({buses: info, lastUpdate: moment(new Date())});  
     });
 
@@ -209,8 +228,8 @@ class App extends React.Component {
     let x = p1._lat - p2._lat;
     let y = (p1._lon - p2._lon)*Math.cos(p2._lat);
     let dist = 110.25* Math.sqrt(x*x + y*y);
-    if (dist > 0.1)
-      console.log(`DISTANCE BETWEEN ${p1._lat},${p1._lon} x ${p2._lat},${p2._lon} = ${dist}`);
+    // if (dist > 0.1)
+    //  console.log(`DISTANCE BETWEEN ${p1._lat},${p1._lon} x ${p2._lat},${p2._lon} = ${dist}`);
     return dist;
   }
 
@@ -218,7 +237,7 @@ class App extends React.Component {
 
   render() {
     const position = [this.state.centerLocation.lat, this.state.centerLocation.lon];
-    console.log(this.state.buses);
+    // console.log(this.state.buses);
     const markers = this.state.buses.map(busInfo => {
       // bus is a list of lat longs for this bus ... 
       // create a poly line to display itss location
@@ -280,8 +299,9 @@ class App extends React.Component {
           return t;
         }, [[]]);
       // show distances 
-      console.log(`${busInfo.name} => ${Math.min(...distances)} ... ${Math.max(...distances)}`);
-      console.log(`LAST POSITION = ${lastPosition}  |   STATE = ${busInfo.moved}`);
+      // TODO: enable when required
+      // console.log(`${busInfo.name} => ${Math.min(...distances)} ... ${Math.max(...distances)}`);
+      // console.log(`LAST POSITION = ${lastPosition}  |   STATE = ${busInfo.moved}`);
 
       return (
           <Overlay name={name} key={`bus.info.${name}`}>
@@ -356,13 +376,14 @@ class App extends React.Component {
           return t;
         }, [[]]);
       // show distances 
-      console.log(`${busInfo.name} => ${Math.min(...distances)} ... ${Math.max(...distances)}`);
-      console.log(`LAST POSITION = ${lastPosition}  |   STATE = ${busInfo.moved}`);
+      // TODO: enable when required
+      // console.log(`${busInfo.name} => ${Math.min(...distances)} ... ${Math.max(...distances)}`);
+      // console.log(`LAST POSITION = ${lastPosition}  |   STATE = ${busInfo.moved}`);
 
       return (
           <Overlay name={name} key={`bus.info.${name}-track`}>
             <LayerGroup>
-            {paths.map((path, i) => (<Polyline key={`${hash}.path.${i}`} icon={this.busIcon} positions={path} className={clazz} weight={3}></Polyline>))}
+            {paths.map((path, i) => (<AntPath key={`${hash}.path.${i}`} icon={this.busIcon} positions={path} className={clazz} weight={3}></AntPath>))}
             </LayerGroup>
           </Overlay>
         );
@@ -373,8 +394,8 @@ class App extends React.Component {
     // add bus stops
 
     const lines = this.state.stops.map(stop => stop.line).reduce((t, v) => {!t.includes(v) && t.push(v); return t; }, []);
-    console.log('LINESS => '); 
-    console.log(lines);
+    // console.log('LINESS => '); 
+    // console.log(lines);
     const busStops = lines.map(line => {
        const stops = this.state.stops && this.state.stops.filter(v => v.line === line).map(stop => {
         let type = this.DEFAULT_LINE;
@@ -393,8 +414,8 @@ class App extends React.Component {
       return (<Overlay name={line} key={`${line}-group`}><LayerGroup>{stops}</LayerGroup></Overlay>);  
     });
 
-    console.log('BUS STOPS => ');
-    console.log(busStops);
+    // console.log('BUS STOPS => ');
+    // console.log(busStops);
 
 
     // leaflet providers
@@ -440,9 +461,32 @@ class App extends React.Component {
         </LayersControl>
       </Map>
     );
-    console.log('MAP => ');
-    console.log(map);
-    return (<div><div style={{height:'90vh'}}>{map}</div><div>Last update = {this.state.lastUpdate.format()}</div></div>);
+    // console.log('MAP => ');
+    // console.log(map);
+    return (
+      <Router>
+        <div>
+          <nav>
+            <ul>
+              <li><Link to="/">Map</Link></li>
+              <li><Link to="/admin">Admin</Link></li>
+            </ul>
+          </nav> 
+
+          <Switch>
+            <Route exact path="/">
+              <div>
+                <div style={{height:'90vh'}}>{map}</div>
+                <div>Last update = {this.state.lastUpdate.format()}</div>
+              </div>
+            </Route>
+            <Route path="/admin">
+              <BusStateForm mybusway={mybusway} buses={this.state.buses} updateBus={this.state.updateBus.bind(this)}></BusStateForm>
+            </Route>
+          </Switch>
+        </div>
+      </Router>
+);
     // return (<div>
     //     <div>{map}</div>
     //     <div>Last update = {this.state.lastUpdate}</div>
