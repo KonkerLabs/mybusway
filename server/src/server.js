@@ -130,7 +130,7 @@ class ServerNode {
     return this.getLines().then(lines => {
       return lines.map(line => { return line.stops; });
     }).then(stops => {
-      console.log(stops);
+      // console.log(stops);
       return stops;
     });
   }
@@ -159,7 +159,7 @@ class ServerNode {
         if (!doc.stops) doc.stops = [];
 
         console.log('STOPS => ');
-        console.log(doc.stops);
+        // console.log(doc.stops);
         
         var found = doc.stops.reduce((t,v,i) => (t || (v.name === stop.name)), false); 
         if (found) { 
@@ -327,13 +327,15 @@ class ServerNode {
       .then(res => {
         // update local cache and server information  ... 
         console.log('SERVER => updateBusState');
-        console.log(bus);
+        // console.log(bus);
         let busCache = this._busesIndex[bus.hash]; 
         busCache.state = state;
-        // update on local database 
+        // update on local database
+        // console.log(`looking for bus ${bus.guid}`) ;
         Vehicle.findOne({device_guid: bus.guid}, (err, obj) => {
           if (err) throw err;
           if (obj) {
+            // console.log(`updating state on database ${obj.state} -> ${state}`);
             obj.state = state;
             obj.save((err, obj) => {
               if (err) throw err;
@@ -356,7 +358,8 @@ class ServerNode {
         data.forEach(bus => {
           bus.hash = md5(`${bus.guid} - ${bus.name}`);
           // update locally the bus state with last information read from the platform ...
-          bus.state = (bus.description === null) ? 'undefined' : bus.description.state;
+          console.log(`loading bus state ${bus.name}... ${bus.description} ... ${JSON.parse(bus.description).state}`);
+          bus.state = (bus.description === null) ? 'undefined' : JSON.parse(bus.description).state;
 
           this._buses[bus.guid] = bus;
           this._busesIndex[bus.hash] = bus;                  
@@ -373,14 +376,14 @@ class ServerNode {
                 name: bus.name,
                 device_guid: bus.guid,
                 hash: bus.hash,
-                state: (bus.description === null) ? 'undefined' : bus.description.state,
+                state: bus.state,
                 active: bus.active
               });
   
               vehicle.save((err, obj) => {
                 if (err) throw err;
                 console.log('saved new Vehicle'); 
-                console.log(JSON.stringify(bus));
+                // console.log(JSON.stringify(bus));
               });    
             }
           });

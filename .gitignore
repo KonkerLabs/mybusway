@@ -29,6 +29,8 @@
 # database
 
 data/db
-
+data/postgres
+scripts/data
+**/.ipynb_checkpoints
 
 src/config.js

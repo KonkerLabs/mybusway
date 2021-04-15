@@ -11,7 +11,7 @@ class myRouter extends express.Router {
     // #swagger.parameters['line?'] = {required:false}
     // return current position for a given bus .. 
     var line = req.params.line;
-    var data = server._busStops.filter(bs => line !== 'undefined' ? bs.line === line : true);
+    var data = server._busStops.filter(bs => line !== undefined && line !== 'undefined' && line !== '' ? bs.line === line : true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).send(data);
   });

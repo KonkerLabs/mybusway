@@ -71,7 +71,36 @@ services:
       - "80:80"
     networks:
       - mybus-compose-network
-
+  postgres: 
+    image: postgres:alpine
+    container_name: postgres
+    ports: 
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: hTcDUVse5E9ZDB5g
+      POSTGRES_USER: keycloak
+      POSTGRES_DB: keycloak
+    networks:
+      - mybus-compose-network
+  keycloak:
+    image: jboss/keycloak
+    container_name: keycloak 
+    ports: 
+      - "5400:8080"
+    environment: 
+      KEYCLOAK_USER: admin 
+      KEYCLOAK_PASSWORD: NMdy4dkra9JzpeNP
+      DB_VENDOR: postgres
+      DB_ADDR: postgres
+      DB_PORT: 5432
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: hTcDUVse5E9ZDB5g
+    networks:
+      - mybus-compose-network
+          
 networks: 
     mybus-compose-network:
       driver: bridge

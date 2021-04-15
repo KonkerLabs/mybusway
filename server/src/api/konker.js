@@ -111,7 +111,7 @@ class KonkerAPI {
                 }
               })
               .catch(ex => {
-                reject({transition:false, message: JSON.stringify(res.data)});
+                reject({transition:false, message: JSON.stringify(ex)});
               });
           } else { 
             resolve({transition:false, message:`already in the same state '${state}'`});

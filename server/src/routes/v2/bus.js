@@ -56,7 +56,7 @@ class myRouter extends express.Router {
       })
       .catch(ex => {
         res.setHeader('Access-Control-Allow-Origin', '*');
-        console.log('error2');
+        console.log('API-V2: error2');
         console.log(ex);
         res.status(500).send(ex);
       });
@@ -70,7 +70,7 @@ class myRouter extends express.Router {
       var returnValue = Object.keys(data).map(busId => {
         var bus = data[busId];
         if (bus.active) {
-          console.log(bus);
+          // console.log(bus);
           var info = {
             hash: bus.hash,
             name: bus.name,
@@ -83,7 +83,7 @@ class myRouter extends express.Router {
         return undefined;
       });
     
-      console.log(returnValue);
+      // console.log(returnValue);
     
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.status(200).send(returnValue);
