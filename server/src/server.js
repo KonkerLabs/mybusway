@@ -1,4 +1,4 @@
-/*jshint esversion: 6 */
+/*jshint esversion: 9 */
 
 var moment = require('moment');
 const { MongoClient } = require('mongodb');
@@ -69,8 +69,10 @@ class ServerNode {
   }
 
   readConfig() {
+    console.log('READING CONFIG');
     var fs = require('fs');
     this._busStops = JSON.parse(fs.readFileSync(process.env.BUS_STOP_CONFIG));
+    console.log(`BUS STOPS => ${this._busStops.length}`);
   }
 
   // lines API
@@ -80,7 +82,7 @@ class ServerNode {
 
       Line.find((err, lines) => {
         this._lines = lines;
-        return lines;
+        return this._lines;
       })
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -319,14 +321,45 @@ class ServerNode {
     });
   }
 
+  updateBusState(bus, state) {
+    return new Promise((resolve, reject) => {
+      this._konker.api.updateDeviceState({...bus, state:state})
+      .then(res => {
+        // update local cache and server information  ... 
+        console.log('SERVER => updateBusState');
+        console.log(bus);
+        let busCache = this._busesIndex[bus.hash]; 
+        busCache.state = state;
+        // update on local database 
+        Vehicle.findOne({device_guid: bus.guid}, (err, obj) => {
+          if (err) throw err;
+          if (obj) {
+            obj.state = state;
+            obj.save((err, obj) => {
+              if (err) throw err;
+              console.log('updated Vehicle state'); 
+              console.log(JSON.stringify(obj));
+            });    
+          }
+        });
+
+        resolve(res);
+      })
+      .catch(ex => reject(ex));
+    });
+  }
+
   refreshBuses() {
     return new Promise((resolve, reject) => {
       this._konker.api.getAllDevices()
       .then(data => {
         data.forEach(bus => {
           bus.hash = md5(`${bus.guid} - ${bus.name}`);
+          // update locally the bus state with last information read from the platform ...
+          bus.state = (bus.description === null) ? 'undefined' : bus.description.state;
+
           this._buses[bus.guid] = bus;
-          this._busesIndex[bus.hash] = bus;        
+          this._busesIndex[bus.hash] = bus;                  
           // update database for current buses 
 
 
@@ -340,12 +373,14 @@ class ServerNode {
                 name: bus.name,
                 device_guid: bus.guid,
                 hash: bus.hash,
-                active: true
+                state: (bus.description === null) ? 'undefined' : bus.description.state,
+                active: bus.active
               });
-    
+  
               vehicle.save((err, obj) => {
                 if (err) throw err;
-                console.log('saved new Vehicle');
+                console.log('saved new Vehicle'); 
+                console.log(JSON.stringify(bus));
               });    
             }
           });

@@ -10,6 +10,7 @@ var VehicleSchema = new Schema({
   createdAt: {type: Date, default: Date.now},
   line: String,
   line_id: ObjectId,
+  state: { type: String, enum: ['green', 'yellow', 'pink', 'blue', 'express', 'dedicated', 'loading', 'maintenance', 'undefined'] },
   active: Boolean // flag if this car is active 
 });
 

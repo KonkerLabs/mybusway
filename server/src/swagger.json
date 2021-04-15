@@ -1,23 +1,1067 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0.0",
-    "title": "MyBusWay SERVER API",
-    "description": "MyBusWay server API",
-    "license": {
-      "name": "MIT",
-      "url": "https://opensource.org/licenses/MIT"
-    }
+    "version": "2.1.0",
+    "title": "RDX Projac",
+    "description": "RDX API for Projac"
   },
   "host": "localhost:8080",
   "basePath": "/",
   "tags": [
     {
-      "name": "Users",
-      "description": "API for users in the system"
+      "name": "auth",
+      "description": "used to authenticate and authorize user access on the platform, when required"
+    },
+    {
+      "name": "bus",
+      "description": "bus API used to get information regarding the vehichle and setting it's current usage"
+    },
+    {
+      "name": "line",
+      "description": "line information - creation, update"
+    },
+    {
+      "name": "user",
+      "description": "user information - used for some roles like admin and driver"
     }
   ],
-  "schemes": ["http", "https"],
-  "consumes": ["application/json"],
-  "produces": ["application/json"]
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "securityDefinitions": {},
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/login": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      },
+      "post": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/logout": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/jwt": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/expireCache": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "produces": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cacheInfo": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "produces": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/buses": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "produces": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/bus/{hash}/position": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "produces": [],
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/stops/{line?}": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "produces": [],
+        "parameters": [
+          {
+            "name": "line?",
+            "in": "path",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/lines": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/line": {
+      "post": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/line/{name}": {
+      "put": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/line/{name}/stops": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/line/{name}/stop": {
+      "post": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/line/{line}/stop/{stop}": {
+      "delete": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "stop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "stop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/bus/{bus}/inLine/{line}": {
+      "post": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/users/": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/vehicles/": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/vehicles/{id}": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/vehicles/{id}/use/{line}/by/{driver}/on/{dt}": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "driver",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "dt",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v2/auth/local": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/v2/auth/twitter": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/v2/auth/twitter/callback": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/v2/auth/facebook": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/v2/auth/facebook/callback": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/v2/buses/{hash}/state/{state}": {
+      "post": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "produces": [],
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "bus state - [green, yellow, pink, blue, express, dedicated, loading, maintenance, undefined]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v2/buses/{bus}/inLine/{line}": {
+      "post": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/v2/buses/{hash}/position": {
+      "get": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "produces": [],
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v2/buses/": {
+      "get": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "produces": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v2/lines/": {
+      "get": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      },
+      "post": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/v2/lines/{name}": {
+      "put": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/v2/lines/{name}/stops": {
+      "get": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/v2/lines/{name}/stop": {
+      "post": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/v2/lines/{line}/stop/{stop}": {
+      "delete": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "stop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "line"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "stop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/v2/stops/{line?}": {
+      "get": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "produces": [],
+        "parameters": [
+          {
+            "name": "line?",
+            "in": "path",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v2/users/": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v2/users/{id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/vehicles/": {
+      "get": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v2/vehicles/{id}": {
+      "get": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/vehicles/{id}/use/{line}/by/{driver}/on/{dt}": {
+      "get": {
+        "tags": [
+          "bus"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "line",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "driver",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "dt",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {}
 }

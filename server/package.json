@@ -1,6 +1,6 @@
 {
   "name": "mybusway-server",
-  "version": "1.0.5",
+  "version": "2.1.0",
   "custom": {
     "packageName": "konkerlabs/techlab-misc:mybusway-server-v"
   },
@@ -31,10 +31,12 @@
     "passport-local": "^1.0.0",
     "passport-ses": "^0.0.2",
     "passport-twitter": "^1.0.4",
+    "swagger-autogen": "^2.5.8",
     "swagger-ui-express": "^4.1.4"
   },
   "scripts": {
     "start": "export NODE_ENV=development & nodemon",
+    "start-doc": "export NODE_ENV=development & node src/swagger.js",
     "docker-build": "docker build -t ${npm_package_custom_packageName}${npm_package_version} . ",
     "docker-run-err": "docker run --rm --env KONKER_APPLICATION=globo2 -p 8080:8080 --name mybusway-server ${npm_package_custom_packageName}${npm_package_version}",
     "docker-run": "docker run --rm -p 8080:8080 -e DEBUG_MODE_CACHED_POSITIONS=0 --name mybusway-server ${npm_package_custom_packageName}${npm_package_version}",
