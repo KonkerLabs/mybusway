@@ -2,6 +2,7 @@
 
 import React, {useState, useEffect} from 'react';
 import Keycloak from 'keycloak-js';
+import { Link } from 'react-router-dom';
 
 const Secured = (props) => {
 
@@ -32,15 +33,15 @@ const Secured = (props) => {
       // check if the user has the required authorization 
       // after he/she passes the authentication process
 
-      console.log(kc);
-      console.log(kc.tokenParsed);
-      console.log(roles);
-      console.log(kc.resourceAccess.account.roles);
+      // console.log(kc);
+      // console.log(kc.tokenParsed);
+      // console.log(roles);
+      // console.log(kc.resourceAccess.account.roles);
 
       if ((roles === undefined) || (roles.length === 0) || (roles && roles.map((role) => { if (!kc.tokenParsed.roles) { return -1 } else { return kc.tokenParsed.roles.indexOf(role) } } ).reduce((p,c) => p && (c !== -1), true))) {
-        return (<div>{props.children}</div>);
+        return (<div><Link onClick={() => kc.logout()}>logout</Link>{props.children}</div>);
       } else {
-        return (<div>User not authorized to view this content ...</div>);
+        return (<div><Link onClick={() => kc.logout()}>logout</Link><div>User not authorized to view this content ...</div></div>);
       }
 
     } else {
