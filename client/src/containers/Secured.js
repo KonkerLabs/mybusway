@@ -8,7 +8,7 @@ const Secured = (props) => {
   const [kc, setKC] = useState();
   const [authenticated, setAuthenticated] = useState();
 
-  const { updateToken } = props;
+  const { updateToken, roles } = props;
 
   useEffect(() => {
     const keycloak = new Keycloak('/resources/keycloak.json');
@@ -29,9 +29,22 @@ const Secured = (props) => {
 
   if (kc) {
     if (authenticated) {
-      return (<div>{props.children}</div>);
+      // check if the user has the required authorization 
+      // after he/she passes the authentication process
+
+      console.log(kc);
+      console.log(kc.tokenParsed);
+      console.log(roles);
+      console.log(kc.resourceAccess.account.roles);
+
+      if ((roles === undefined) || (roles.length === 0) || (roles && roles.map((role) => { if (!kc.tokenParsed.roles) { return -1 } else { return kc.tokenParsed.roles.indexOf(role) } } ).reduce((p,c) => p && (c !== -1), true))) {
+        return (<div>{props.children}</div>);
+      } else {
+        return (<div>User not authorized to view this content ...</div>);
+      }
+
     } else {
-      return (<div>unable to authorize user</div>);
+      return (<div>unable to authenticate user</div>);
     }
   } else { 
     return (<div>authorizing user ...</div>);

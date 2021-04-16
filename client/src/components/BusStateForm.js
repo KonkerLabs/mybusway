@@ -104,7 +104,7 @@ const BusStateForm = (props) =>  {
     return bus;  
   });
 
-    return (<Secured updateToken={updateToken}><div>
+    return (<Secured updateToken={updateToken} roles={['admin']}><div>
 
       Atualize o estado da frota:
 
