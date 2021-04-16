@@ -8,7 +8,7 @@ class myRouter extends express.Router {
 
   // driver allocation 
 
-  this.post('/:hash/state/:state', (req, res) => { 
+  this.post('/:hash/state/:state', this.server.keycloak().protect(['admin']), (req, res) => { 
     // #swagger.tags = ['bus']
     // #swagger.parameters['state'] = {'description':'bus state - [green, yellow, pink, blue, express, dedicated, loading, maintenance, undefined]'}
     

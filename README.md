@@ -56,3 +56,8 @@ docker-compose up
 on server environment, point to the new version deployed and recycle the container 
 the specific command is platform dependent (AWS, GCP, AZURE, ALICLOD, DO, HEROKU, ...) and if you're using K8 
 to provide the deployment 
+
+
+-- REFERENCES ----------------------------------------------------
+
+* for authorization and authentication used https://medium.com/devops-dudes/secure-front-end-react-js-and-back-end-node-js-express-rest-api-with-keycloak-daf159f0a94e

@@ -25,13 +25,15 @@ const MONGO_USERNAME = process.env.MONGO_USERNAME || 'mongo';
 const MONGO_PASSWORD = process.env.MONGO_PASSWORD || 'mongopwd';
 const MONGO_DATABASE = process.env.MONGO_DATABASE || 'mybusway';
 
-// Conexión a la base de datos de MongoDB que tenemos en local
+// MongoDB database connection
 var urlx = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_SERVER}:${MONGO_PORT}/${MONGO_DATABASE}`;
 console.log(urlx);
 mongoose.connect(urlx, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, res) {
   if(err) throw err;
   console.log('Conectado con éxito a la BD');
 });
+
+const keycloak = require('./config/keycloak-config').initKeycloak();
 
 var app = express();
 
@@ -56,10 +58,14 @@ app.use(cors());
 // y que lo recuerde aunque abandonemos la página
 app.use(session({ secret: 'lollllo' }));
 
+
+app.use(keycloak.middleware());
+
 // Configuración de Passport. Lo inicializamos
 // y le indicamos que Passport maneje la Sesión
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 
 // Si estoy en local, le indicamos que maneje los errores
@@ -87,7 +93,7 @@ console.log(`using ${DEBUG_MODE_CACHED_POSITIONS ? 'DEBUG' : 'PRODUCTION'} MODE 
 console.log('---------------');
 
 const { ServerNode } = require('./server');
-var server = new ServerNode(konker);
+var server = new ServerNode(konker, keycloak);
 
 server.refreshBuses().then(data => console.log('LOADED BUSES')).catch(ex => { console.error('PROBLEMS LOADING BUSES; CHECK APPLICATION AND API KEY INFORMATION'); process.exit(1); });
 

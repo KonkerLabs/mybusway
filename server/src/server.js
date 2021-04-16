@@ -25,7 +25,7 @@ const MONGO_PASSWORD = process.env.MONGO_PASSWORD || 'mongopwd';
 const MONGO_DATABASE = process.env.MONGO_DATABASE || 'mybusway';
 
 class ServerNode { 
-  constructor(konker) {
+  constructor(konker, keycloak) {
     this._buses = {};
     this._busesIndex = {};
     this.readConfig();
@@ -34,6 +34,7 @@ class ServerNode {
     this._flagReloadCache = false;
     this._konker = konker;
     this._lines = [];
+    this._keycloak = keycloak;
 
     // initialize mongo driver 
     var uri = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_SERVER}:${MONGO_PORT}/${MONGO_DATABASE}`;
@@ -48,6 +49,10 @@ class ServerNode {
       console.log(err);
       console.log(uri);
     });
+  }
+
+  keycloak() {
+    return this._keycloak;
   }
 
   /** login and return a token to the user  */
