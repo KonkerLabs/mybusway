@@ -76,6 +76,7 @@ to provide the deployment
 
 ## REFERENCES 
 
-* for authorization and authentication used 
+for authorization and authentication of users (JWT)
+
  * https://medium.com/devops-dudes/secure-front-end-react-js-and-back-end-node-js-express-rest-api-with-keycloak-daf159f0a94e
  * https://jasonwatmore.com/post/2019/02/01/react-role-based-authorization-tutorial-with-example
