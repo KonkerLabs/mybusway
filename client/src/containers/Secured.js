@@ -24,6 +24,7 @@ const Secured = (props) => {
       }
 
     });
+    // eslint-disable-next-line
   }, []);
 
   // render
@@ -33,15 +34,16 @@ const Secured = (props) => {
       // check if the user has the required authorization 
       // after he/she passes the authentication process
 
-      // console.log(kc);
-      // console.log(kc.tokenParsed);
+      //console.log('TOKEN-KC');
+      //console.log(kc);
+      //console.log(kc.tokenParsed);
       // console.log(roles);
       // console.log(kc.resourceAccess.account.roles);
 
       if ((roles === undefined) || (roles.length === 0) || (roles && roles.map((role) => { if (!kc.tokenParsed.roles) { return -1 } else { return kc.tokenParsed.roles.indexOf(role) } } ).reduce((p,c) => p && (c !== -1), true))) {
-        return (<div><Link onClick={() => kc.logout()}>logout</Link>{props.children}</div>);
+        return (<div>{kc.tokenParsed.email} <Link to="/" onClick={() => kc.logout({redirectUri:window.location.protocol + "//" + window.location.host})}>logout</Link>{props.children}</div>);
       } else {
-        return (<div><Link onClick={() => kc.logout()}>logout</Link><div>User not authorized to view this content ...</div></div>);
+        return (<div>{kc.tokenParsed.email} <Link to="/" onClick={() => kc.logout({redirectUri:window.location.protocol + "//" + window.location.host})}>logout</Link><div>User not authorized to view this content ...</div></div>);
       }
 
     } else {

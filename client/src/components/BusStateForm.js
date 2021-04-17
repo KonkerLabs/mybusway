@@ -117,7 +117,7 @@ const BusStateForm = (props) =>  {
             <th>Estado atual</th>
           </tr>
           </thead><tbody>
-          {buses && buses.map((bus) => {
+          {buses && buses.sort((a,b) => a.name - b.name).map((bus) => {
             return (<tr key={`${bus.hash}-line`}>
               <td>{bus.name}</td>
               <td><div style={{color:options[bus.state].fontcolor, backgroundColor:options[bus.state].color}}>{options[bus.state].name}</div></td>

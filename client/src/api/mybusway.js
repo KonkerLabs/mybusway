@@ -4,17 +4,15 @@ import env from "@beam-australia/react-env";
 import instance  from '../interceptors/authentication';
 var moment = require('moment');
 
-console.log('DOTENV LOADED');
-console.log(process.env);
 console.log('WINDOWS LOADED');
-console.log(window._env);
+console.log(window._env_);
 console.log(`ENV = ${env('MYBUSWAY_SERVER')}`)
 
 
 class MyBusWay {
 
   constructor(props) {
-    this.uri = env('MYBUSWAY_SERVER') || 'http://projac.mybusway.com:8080'; //'http://localhost:8080';
+    this.uri = window._env_ ? window._env_.MYBUSWAY_SERVER : 'http://projac.mybusway.com:8080'; 
     console.log(`SERVER = ${this.uri}`);
     this.token = props && props.token;
   }

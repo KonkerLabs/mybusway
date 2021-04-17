@@ -14,6 +14,11 @@ KONKER_APPLICATION=<application name -- created on the KONKER PLATFORM> that hol
 BUS_STOP_CONFIG=local JSON file used to indicate stops geolocation (for development purpose)
 DEBUG_MODE_CACHED_POSITIONS=<True/False> to indicate if one should present data in the console regarding the updated position of devices
 
+KC_REALM= MyBusway
+KC_SERVER_URL= <keycloack-server>/auth/ URL 
+KC_RESOURCE=mybusway-microservice
+KC_REALM_PUBLIC_KEY=<public key for this application>
+
 * client environemnt (.env)
 
 MYBUSWAY_SERVER=<http address where to find the server application running>

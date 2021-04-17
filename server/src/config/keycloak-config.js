@@ -14,6 +14,9 @@ var keycloakConfig = {
   'realmPublicKey': process.env.KC_REALM_PUBLIC_KEY,
   'bearer-only': true
 };
+console.log('KEYCLOAK CONFIG --------------------------');
+console.log(keycloakConfig);
+console.log('------------------------------------------');
 
 const initKeycloak = () => {
   if (keycloak) {

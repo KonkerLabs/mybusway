@@ -17,7 +17,7 @@ const doc = {
     {"name": "line", "description": "line information - creation, update"},
     {"name": "user", "description": "user information - used for some roles like admin and driver"}
   ],
-  host: "localhost:8080",
+  host: process.env.SWAGGER_URL || 'localhost:8080', 
   basePath: "/",
   schemes: ['http', 'https'],
   consumes: ['application/json'],

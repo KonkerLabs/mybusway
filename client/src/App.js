@@ -104,7 +104,7 @@ const App = (props) => {
   const [ stops, setStops ] = useState([]);
   const [ zoom, setZoom ] = useState(17);
   const [ lastUpdate, setLastUpdate ] = useState(moment());
-  const [ setLocation ] = useState({lat:null, lng:null});
+  const [ location, setLocation ] = useState({lat:null, lng:null});
   const [ centerLocation ] = useState({ lat: -22.961683, lon: -43.406825 });
   const interval = useRef();
   // var interval;
@@ -162,8 +162,12 @@ const App = (props) => {
             if (loc)
               setLocation({ lat: loc.lat, lng: loc.lon});
             setZoom(17);
-          });
-    }
+          })
+        .catch(e => {
+          console.log('EXCEPTION');
+          console.log(e);
+        });
+    };
    // status.textContent = 'Locating…';
     // loading active buses 
     mybusway.api.getBuses().then(data => {
