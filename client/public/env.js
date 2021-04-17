@@ -1,1 +1,1 @@
-window._env = {"NODE_ENV":"development"};
+window._env = {"NODE_ENV":"development","REACT_APP_MYBUSWAY_SERVER":"http://localhost:8080"};

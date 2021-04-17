@@ -1,13 +1,15 @@
-FROM node:alpine
-
-## Add the wait script to the image
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
-RUN chmod +x /wait
-
-WORKDIR /usr/src/app
-COPY package*.json ./
-
-RUN yarn install 
+#FROM node:alpine
+#
+### Add the wait script to the image
+#ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
+#RUN chmod +x /wait
+#
+#WORKDIR /usr/src/app
+#COPY package*.json ./
+#
+#RUN yarn install 
+#
+FROM alexjunq/mbw-server:base
 
 COPY . .
 EXPOSE 8080

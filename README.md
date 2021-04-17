@@ -14,6 +14,11 @@ KONKER_APPLICATION=<application name -- created on the KONKER PLATFORM> that hol
 BUS_STOP_CONFIG=local JSON file used to indicate stops geolocation (for development purpose)
 DEBUG_MODE_CACHED_POSITIONS=<True/False> to indicate if one should present data in the console regarding the updated position of devices
 
+KC_REALM= MyBusway
+KC_SERVER_URL= <keycloack-server>/auth/ URL 
+KC_RESOURCE=mybusway-microservice
+KC_REALM_PUBLIC_KEY=<public key for this application>
+
 * client environemnt (.env)
 
 MYBUSWAY_SERVER=<http address where to find the server application running>
@@ -56,3 +61,10 @@ docker-compose up
 on server environment, point to the new version deployed and recycle the container 
 the specific command is platform dependent (AWS, GCP, AZURE, ALICLOD, DO, HEROKU, ...) and if you're using K8 
 to provide the deployment 
+
+
+-- REFERENCES ----------------------------------------------------
+
+* for authorization and authentication used https://medium.com/devops-dudes/secure-front-end-react-js-and-back-end-node-js-express-rest-api-with-keycloak-daf159f0a94e
+
+* https://jasonwatmore.com/post/2019/02/01/react-role-based-authorization-tutorial-with-example

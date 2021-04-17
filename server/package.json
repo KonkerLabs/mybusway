@@ -1,6 +1,6 @@
 {
   "name": "mybusway-server",
-  "version": "1.0.5",
+  "version": "3.0.2",
   "custom": {
     "packageName": "konkerlabs/techlab-misc:mybusway-server-v"
   },
@@ -13,12 +13,14 @@
     "axios": "^0.20.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "chalk": "^4.1.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "keycloak-connect": "^12.0.4",
     "md5": "^2.3.0",
     "method-override": "^3.0.0",
     "moment": "^2.28.0",
@@ -31,13 +33,15 @@
     "passport-local": "^1.0.0",
     "passport-ses": "^0.0.2",
     "passport-twitter": "^1.0.4",
+    "swagger-autogen": "^2.5.8",
     "swagger-ui-express": "^4.1.4"
   },
   "scripts": {
     "start": "export NODE_ENV=development & nodemon",
+    "start-doc": "export NODE_ENV=development & node src/swagger.js",
     "docker-build": "docker build -t ${npm_package_custom_packageName}${npm_package_version} . ",
     "docker-run-err": "docker run --rm --env KONKER_APPLICATION=globo2 -p 8080:8080 --name mybusway-server ${npm_package_custom_packageName}${npm_package_version}",
-    "docker-run": "docker run --rm -p 8080:8080 -e DEBUG_MODE_CACHED_POSITIONS=0 --name mybusway-server ${npm_package_custom_packageName}${npm_package_version}",
+    "docker-run": "docker run --rm -p 8080:8080 -e KC_REALM_PUBLIC_KEY='MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqm0Y/wQesVOcA0tAOETbVbuoOK3gTiZ7Nr9JS5PHJT8n7o93XHjXB8+ThsHmhKz/eoyp/9A4qPathRauzZI9vn/xHLnjHbtSH3abIRT4X3TuBJcZH+jOIVrH1f69MxdWoPW/sQrVad08DuNRhVon8gMW0p2ZoTV3xGgHCg2Efeux1e4ygatDGHvzWl6BaZeMx6dn/QACuDhys0O1QJGVJYKXSetifu8ocRpYDWUz0OPNiE6xWoilHJu+UhtlVldHVIIrBknyEVZmfQxxPBsz3OHLu1biv/WURDAtPWXYXrJ6XGDnie+2mDUPIXReWPqt2HQnhe246OW0HClAjim+MwIDAQAB' -e DEBUG_MODE_CACHED_POSITIONS=0 -e KC_SERVER_URL='http://192.168.0.138:5400/auth/' -e MONGO_SERVER=192.168.0.138 --name mybusway-server ${npm_package_custom_packageName}${npm_package_version}",
     "docker-push": "docker push ${npm_package_custom_packageName}${npm_package_version}"
   }
 }

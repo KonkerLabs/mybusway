@@ -30,7 +30,13 @@ class KonkerAPI {
 
   post(url, data) {
     return new Promise((resolve, reject) => {
-      axios.post(url, params=data, this.getConfig()).then(res => resolve(res)).catch(ex => reject(ex));
+      axios.post(url, data=data, this.getConfig()).then(res => resolve(res)).catch(ex => reject(ex));
+    });
+  }
+
+  put(url, data) {
+    return new Promise((resolve, reject) => {
+      axios.put(url, data=data, this.getConfig()).then(res => resolve(res)).catch(ex => reject(ex));
     });
   }
 
@@ -60,6 +66,66 @@ class KonkerAPI {
       this.get(`${this.baseURI}/${this.apiVersion}/${application}/devices/?size=500`)
         .then(res => resolve(res.data.result))
         .catch(ex => reject(ex));
+    });
+  }
+
+  updateDeviceState(options) {
+    var guid = this.getValueOrDefault(options, 'guid');
+    var state = this.getValueOrDefault(options, 'state');
+
+    // console.log(`KONKERAPI: new state ${state}`);
+    
+    return new Promise((resolve, reject) => {
+      this.get(`${this.baseURI}/${this.apiVersion}/${this.application}/devices/${guid}`)
+      .then(res => {
+        if (res.data.code === 200) {
+          // OK
+          let record = res.data.result;
+
+          return(record);
+        }
+        return undefined; 
+      })
+      .then(record => {
+        if (record) {
+          // update this record for new values ...
+          // and return the executed transition when success 
+          // 
+          let info = JSON.parse(record.description);
+          if (!info) { info = {}; }
+          let oldState = info.state;
+
+          if (oldState !== state) {
+
+            info.state = state;
+            record.description = JSON.stringify(info);
+
+            this.put(`${this.baseURI}/${this.apiVersion}/${this.application}/devices/${guid}`, record)
+              .then(res => { 
+                // console.log(res.data);
+                if (res.data.code === 200) {
+                  console.log(`KONKER.API => executed state transition on ${record.id} from '${oldState}' -> '${state}'`);
+                  resolve({transition:true, from:oldState, to:state});
+                } else {
+                  reject({transition:false, message: JSON.stringify(res.data)});
+                }
+              })
+              .catch(ex => {
+                reject({transition:false, message: JSON.stringify(ex)});
+              });
+          } else { 
+            resolve({transition:false, message:`already in the same state '${state}'`});
+          }
+
+        } else {
+          reject({transition:false, message: 'INVALID DEVICE'});
+        }
+      })
+      .catch(ex => {
+        console.log('GET ERROR');
+        console.log(ex);
+        reject(ex);
+      });
     });
   }
 

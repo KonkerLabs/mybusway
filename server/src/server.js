@@ -1,4 +1,4 @@
-/*jshint esversion: 6 */
+/*jshint esversion: 9 */
 
 var moment = require('moment');
 const { MongoClient } = require('mongodb');
@@ -25,7 +25,7 @@ const MONGO_PASSWORD = process.env.MONGO_PASSWORD || 'mongopwd';
 const MONGO_DATABASE = process.env.MONGO_DATABASE || 'mybusway';
 
 class ServerNode { 
-  constructor(konker) {
+  constructor(konker, keycloak) {
     this._buses = {};
     this._busesIndex = {};
     this.readConfig();
@@ -34,6 +34,7 @@ class ServerNode {
     this._flagReloadCache = false;
     this._konker = konker;
     this._lines = [];
+    this._keycloak = keycloak;
 
     // initialize mongo driver 
     var uri = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_SERVER}:${MONGO_PORT}/${MONGO_DATABASE}`;
@@ -48,6 +49,10 @@ class ServerNode {
       console.log(err);
       console.log(uri);
     });
+  }
+
+  keycloak() {
+    return this._keycloak;
   }
 
   /** login and return a token to the user  */
@@ -69,8 +74,10 @@ class ServerNode {
   }
 
   readConfig() {
+    console.log('READING CONFIG');
     var fs = require('fs');
     this._busStops = JSON.parse(fs.readFileSync(process.env.BUS_STOP_CONFIG));
+    console.log(`BUS STOPS => ${this._busStops.length}`);
   }
 
   // lines API
@@ -80,7 +87,7 @@ class ServerNode {
 
       Line.find((err, lines) => {
         this._lines = lines;
-        return lines;
+        return this._lines;
       })
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -128,7 +135,7 @@ class ServerNode {
     return this.getLines().then(lines => {
       return lines.map(line => { return line.stops; });
     }).then(stops => {
-      console.log(stops);
+      // console.log(stops);
       return stops;
     });
   }
@@ -157,7 +164,7 @@ class ServerNode {
         if (!doc.stops) doc.stops = [];
 
         console.log('STOPS => ');
-        console.log(doc.stops);
+        // console.log(doc.stops);
         
         var found = doc.stops.reduce((t,v,i) => (t || (v.name === stop.name)), false); 
         if (found) { 
@@ -319,14 +326,48 @@ class ServerNode {
     });
   }
 
+  updateBusState(bus, state) {
+    return new Promise((resolve, reject) => {
+      this._konker.api.updateDeviceState({...bus, state:state})
+      .then(res => {
+        // update local cache and server information  ... 
+        console.log('SERVER => updateBusState');
+        // console.log(bus);
+        let busCache = this._busesIndex[bus.hash]; 
+        busCache.state = state;
+        // update on local database
+        // console.log(`looking for bus ${bus.guid}`) ;
+        Vehicle.findOne({device_guid: bus.guid}, (err, obj) => {
+          if (err) throw err;
+          if (obj) {
+            // console.log(`updating state on database ${obj.state} -> ${state}`);
+            obj.state = state;
+            obj.save((err, obj) => {
+              if (err) throw err;
+              console.log('updated Vehicle state'); 
+              console.log(JSON.stringify(obj));
+            });    
+          }
+        });
+
+        resolve(res);
+      })
+      .catch(ex => reject(ex));
+    });
+  }
+
   refreshBuses() {
     return new Promise((resolve, reject) => {
       this._konker.api.getAllDevices()
       .then(data => {
         data.forEach(bus => {
           bus.hash = md5(`${bus.guid} - ${bus.name}`);
+          // update locally the bus state with last information read from the platform ...
+          console.log(`loading bus state ${bus.name}... ${bus.description} ... ${JSON.parse(bus.description).state}`);
+          bus.state = (bus.description === null) ? 'undefined' : JSON.parse(bus.description).state;
+
           this._buses[bus.guid] = bus;
-          this._busesIndex[bus.hash] = bus;        
+          this._busesIndex[bus.hash] = bus;                  
           // update database for current buses 
 
 
@@ -340,12 +381,14 @@ class ServerNode {
                 name: bus.name,
                 device_guid: bus.guid,
                 hash: bus.hash,
-                active: true
+                state: bus.state,
+                active: bus.active
               });
-    
+  
               vehicle.save((err, obj) => {
                 if (err) throw err;
-                console.log('saved new Vehicle');
+                console.log('saved new Vehicle'); 
+                // console.log(JSON.stringify(bus));
               });    
             }
           });
