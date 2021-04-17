@@ -49,9 +49,10 @@ Folder  | Description
 ./doc | project architectural information
 ./art | icon and label designs
 
-```NOTE: guarantee that 'credentials.json' is created locally 
-                  out of repository, with credentials used to access the platform ... 
-                  check 'credentials-sample.json' for the file format
+```
+NOTE: guarantee that 'credentials.json' is created locally 
+      out of repository, with credentials used to access the platform ... 
+      check 'credentials-sample.json' for the file format
 ```
 
 to execute the application locally for development purpose use:
@@ -76,6 +77,5 @@ to provide the deployment
 ## REFERENCES 
 
 * for authorization and authentication used 
-** https://medium.com/devops-dudes/secure-front-end-react-js-and-back-end-node-js-express-rest-api-with-keycloak-daf159f0a94e
-
-* https://jasonwatmore.com/post/2019/02/01/react-role-based-authorization-tutorial-with-example
+ * https://medium.com/devops-dudes/secure-front-end-react-js-and-back-end-node-js-express-rest-api-with-keycloak-daf159f0a94e
+ * https://jasonwatmore.com/post/2019/02/01/react-role-based-authorization-tutorial-with-example
