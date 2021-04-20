@@ -1,0 +1,58 @@
+<html>
+  <body>
+    <div class="bus" >
+      <svg id="busx" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 282 426">
+        <path id="Color_Fill_2" data-name="Color Fill 2" class="cls-1" d="M257,124H226c-0.427-8.553-4.559-9.265-12-10-5.533,12.241-4.211,35.685-4,54l2,3h11v7l-11,1q-0.5,1.5-1,3c-4.6,10.831-2.409,45.144,2,53h10v7c-5.533-.138-8.88.459-12,2-2.749,13.593-3.639,44.814,2,55h10v7c-5.533-.138-8.88.459-12,2-2.749,13.593-3.639,44.814,2,55h10c-0.729,3.483-5.8,24.013-8,28-25.943.222-125.889,5.145-140-3,0.219-12.947-3.056-17.178-5-25,6.167,0.346,9.609.623,12-3V307l-12-1v-7l10-1,3-2c0.325-15.977,3.306-43.3-3-54H70v-7c6.167,0.346,9.609.623,12-3V179l-12-1v-7c5.533,0.138,8.88-.459,12-2,0.381-11.113,4.06-47.514-3-52l-1,3-1-6-10,3v7H36l1-9,2-2,39-6,1-59c17.649-22.043,113.773-15.64,135-1v60c13.421,0.9,33.726,2.09,43,8v9ZM137,100c-18.435,6.758-33.869,3.26-47,13l1,28,4-4c28.193-10.426,83.947-13.027,107,4,0.349-11.143,1.03-25.29-3-32C181.509,103.5,161.634,100.033,137,100Zm-29,67-3,4c-0.273,11.711-1.892,29.676,2,38,22.528,0.27,63,6.215,81-2,0.273-11.959,1.991-30.456-2-39Zm1,74-4,3c-0.273,11.711-1.892,29.676,2,38h79l1-3c3.315-7.615,1.991-30.818-1-37Zm-1,74-3,3c-0.339,12.668-1.74,31.044,3,39,21.789,0.313,64.424,6.082,80-3,0.273-11.959,1.991-30.456-2-39H108Z"/>
+      </svg>      
+    </div>
+
+    <button onclick="changeColor(this)">Click</button>
+    <style title="general">
+      .cls-1 {
+        fill: red;
+        fill-rule: evenodd;
+      }
+      .bus {
+        width: 282px;
+        height: 426px;
+        background: url('./image/bus-basic.png');
+        background-size: 100% auto;
+      }
+      .bus svg {
+        mix-blend-mode: multiply;
+      }
+      .blue {
+        background-color: blue;
+        -webkit-filter: grayscale(100%);
+      }
+    </style>
+    <script>
+      function getStyleSheet(unique_title) {
+        for(var i=0; i<document.styleSheets.length; i++) {
+          var sheet = document.styleSheets[i];
+          if(sheet.title == unique_title) {
+            return sheet;
+          }
+        }
+      }
+
+      function getStyle(sheet, name) {
+        for (var i=0; i<sheet.rules.length; i++) {
+          var rule = sheet.rules[i];
+          if (rule.selectorText == name) {
+            return rule.style;
+          }
+        }
+      }
+
+      function changeColor(e) {
+        var ex = document.getElementById("busx");
+        console.log(document.styleSheets);
+        var style = getStyle(getStyleSheet('general'), '.cls-1')
+        style.fill = 'green';
+        
+      }
+
+    </script>
+  </body>
+</html>

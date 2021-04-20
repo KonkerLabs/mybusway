@@ -44,7 +44,24 @@ const App = (props) => {
     RED: {ndx: 0, name: 'ROSA', deltaLat:0, deltaLong:0},
     GREEN: {ndx: 1, name: 'VERDE', deltaLat:0.00005, deltaLong:0.00005},
     BLUE: {ndx: 2, name: 'AZUL', deltaLat:-0.00005, deltaLong:0.00005},
-    YELLOW: {ndx: 3, name: 'AMARELA', deltaLat:0.00005, deltaLong:-0.00005}
+    YELLOW: {ndx: 3, name: 'AMARELA', deltaLat:0.00005, deltaLong:-0.00005},
+    EXPRESS: {ndx: 4, name: 'EXPRESS', deltaLat:0.00005, deltaLong:-0.00005},
+    MAINTENANCE: {ndx: 5, name: 'MANUTENCAO', deltaLat:0.00005, deltaLong:-0.00005},
+    DEDICATED: {ndx: 6, name: 'DEDICADA', deltaLat:0.00005, deltaLong:-0.00005},
+    CHARGING:{ndx: 7, name: 'CARREGANDO', deltaLat:0.00005, deltaLong:-0.00005},
+    UNDEFINED: {ndx: 8, name: 'INDEFINIDA', deltaLat:0.00005, deltaLong:-0.00005}
+  };
+
+  const options = {
+    'green':{'name':'verde', color:'lime', fontcolor: 'blue'},
+    'yellow': {'name':'amarela', color:'gold', fontcolor: 'blue'},
+    'pink': {'name':'rosa', color:'magenta', fontcolor: 'white'},
+    'blue': {'name':'azul', color:'dodgerblue', fontcolor: 'white'},
+    'express': {'name':'expressa', color:'silver', fontcolor: 'black'},
+    'dedicated': {'name':'dedicada', color:'orange', fontcolor: 'black'},
+    'charging': {'name':'carregando', color:'rosybrown', fontcolor: 'white'},
+    'maintenance': {'name':'manutencao', color:'brown', fontcolor: 'white'},
+    'undefined': {'name':'indefinida', color:'black', fontcolor: 'yellow'}
   };
 
   const DEFAULT_LINE = LINE.RED;
@@ -54,7 +71,11 @@ const App = (props) => {
       L.icon({iconUrl:'./image/bus-red.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]}),
       L.icon({iconUrl:'./image/bus-green.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]}),
       L.icon({iconUrl:'./image/bus-blue.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]}),
-      L.icon({iconUrl:'./image/bus-yellow.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]})
+      L.icon({iconUrl:'./image/bus-yellow.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]}),
+      L.icon({iconUrl:'./image/bus-basic.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]}),
+      L.icon({iconUrl:'./image/bus-basic.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]}),
+      L.icon({iconUrl:'./image/bus-basic.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]}),
+      L.icon({iconUrl:'./image/bus-basic.png', iconSize: [35.25, 53.25], iconAnchor: [17.625, 53.25], popupAnchor:[0, -53.25]})
     ],
     STOP: [
       L.icon({iconUrl:'./image/stop-red.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor:[0, -32]}),
@@ -75,6 +96,8 @@ const App = (props) => {
           bus.lastPosition = action.bus.lastPosition;
           bus.lastUpdate = action.bus.lastUpdate;
           bus.moved = action.bus.moved;
+          bus.line = action.bus.line;
+          bus.color = action.bus.color;
         }
         return state;
       }
@@ -113,6 +136,15 @@ const App = (props) => {
   
   useEffect(() => {
 
+    const translateColor = (state) => {
+      try { 
+        return options[state].color;
+      } catch(err) {  
+        return 'lightgray';
+      }
+
+    }
+
     const updateLocation = () => {
       var data = state.buses;
       if (data === undefined) { 
@@ -134,7 +166,9 @@ const App = (props) => {
             let _lastPosition = (busPositions && busPositions.length > 0) ? busPositions[0] : undefined;
             let _moved = _lastPosition && _lastPosition._lat !== _prevPosition._lat && _lastPosition._lon !== _prevPosition._lon;
 
-            return {...bus, positions: busPositions, lastPosition: _lastPosition, moved: _moved};
+            let _color = translateColor(bus.state);
+
+            return {...bus, positions: busPositions, lastPosition: _lastPosition, moved: _moved, color:_color, line:bus.state};
           })
           .catch(ex => {
             console.error(`PROBLEMS UPDATING BUS POSITION for '${bus.name}'`);
@@ -270,15 +304,21 @@ const App = (props) => {
       var line = DEFAULT_LINE;
       var name = busInfo.name;
 
-      switch (busInfo.line) {
-        case "red": line = LINE.RED; break; 
-        case "green": line = LINE.RED; break; 
-        case "blue": line = LINE.RED; break; 
-        case "yellow": line = LINE.RED; break; 
-        default: 
+      switch (busInfo.state) {
+        case "pink": line = LINE.RED; break; 
+        case "green": line = LINE.GREEN; break; 
+        case "blue": line = LINE.BLUE; break; 
+        case "yellow": line = LINE.YELLOW; break; 
+        case "express": line = LINE.EXPRESS; break;
+        case "dedicated": line = LINE.DEDICATED; break;
+        case "charging": line = LINE.CHARGING; break;
+        case "maintenance": line = LINE.MAINTENANCE; break;
+        default: line = LINE.UNDEFINED; break;
       }
 
       busInfo.icon = ICON.BUS[line.ndx];
+
+      console.log(busInfo);
     
       // var now = moment(new Date());
       var lastPosition = busInfo.lastPosition ? L.latLng(busInfo.lastPosition._lat, busInfo.lastPosition._lon): undefined;
@@ -351,12 +391,16 @@ const App = (props) => {
       var line = DEFAULT_LINE;
       var name = `${busInfo.name} histórico`;
 
-      switch (busInfo.line) {
+      switch (busInfo.state) {
         case "red": line = LINE.RED; break; 
-        case "green": line = LINE.RED; break; 
-        case "blue": line = LINE.RED; break; 
-        case "yellow": line = LINE.RED; break; 
-        default: 
+        case "green": line = LINE.GREEN; break; 
+        case "blue": line = LINE.BLUE; break; 
+        case "yellow": line = LINE.YELLOW; break; 
+        case "express": line = LINE.EXPRESS; break;
+        case "dedicated": line = LINE.DEDICATED; break;
+        case "charging": line = LINE.CHARGING; break;
+        case "maintenance": line = LINE.MAINTENANCE; break;
+        default: line = LINE.UNDEFINED; break;
       }
 
       busInfo.icon = ICON.BUS[line.ndx];
@@ -402,7 +446,7 @@ const App = (props) => {
       return (
           <Overlay name={name} key={`bus.info.${name}-track`}>
             <LayerGroup>
-            {paths.map((path, i) => (<AntPath key={`${hash}.path.${i}`} icon={busIcon} positions={path} className={clazz} weight={3}></AntPath>))}
+            {paths.map((path, i) => (<AntPath key={`${hash}.path.${i}`} icon={busIcon} positions={path} className={clazz} options={{color:busInfo.state}} weight={3}></AntPath>))}
             </LayerGroup>
           </Overlay>
         );
